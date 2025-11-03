@@ -1,17 +1,25 @@
 CC=gcc
-CFLAGS=-I.
+CFLAGS=-I. 
 
-sequential_min_max : utils.o find_min_max.o utils.h find_min_max.h
-	$(CC) -o sequential_min_max find_min_max.o utils.o sequential_min_max.c $(CFLAGS)
+# Добавим launch_sequential в цель all
+all: sequential_min_max parallel_min_max launch_sequential
 
-parallel_min_max : utils.o find_min_max.o utils.h find_min_max.h
-	$(CC) -o parallel_min_max utils.o find_min_max.o parallel_min_max.c $(CFLAGS)
+sequential_min_max : sequential_min_max.c utils.o find_min_max.o
+	$(CC) -o $@ $^ $(CFLAGS)
 
-utils.o : utils.h
-	$(CC) -o utils.o -c utils.c $(CFLAGS)
+parallel_min_max : parallel_min_max.c utils.o find_min_max.o
+	$(CC) -o $@ $^ $(CFLAGS)
 
-find_min_max.o : utils.h find_min_max.h
-	$(CC) -o find_min_max.o -c find_min_max.c $(CFLAGS)
+# Новая цель для launch_sequential
+launch_sequential : launch_sequential.c
+	$(CC) -o $@ $< $(CFLAGS)
+
+utils.o : utils.c utils.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+find_min_max.o : find_min_max.c find_min_max.h utils.h
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean :
-	rm utils.o find_min_max.o sequential_min_max parallel_min_max
+	rm -f *.o sequential_min_max parallel_min_max launch_sequential
+
